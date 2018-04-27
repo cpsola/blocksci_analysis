@@ -31,6 +31,10 @@ if __name__ == "__main__":
     blocksci_find_nonstd_inputs(chain, restart_from_height=None, coin=coin)
     blocksci_find_p2wsh_inputs(chain, restart_from_height=None, coin=coin)
 
+    # RECSI paper
+    blocksci_find_native_segwit_outputs(chain, restart_from_height=None, coin=coin)
+    blocksci_find_native_segwit_inputs(chain, restart_from_height=None, coin=coin)
+
     # Read pickle files and create json files for STATUS
     print("Dumping estimations to json files")
     dump_estimations_to_json(coin=coin, input_type="ALL")

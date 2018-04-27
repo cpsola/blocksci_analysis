@@ -279,6 +279,91 @@ def blocksci_find_p2wsh_inputs(chain, restart_from_height=None, coin=BITCOIN):
     pickle.dump((p2wsh_sizes_outs, p2wsh_sizes_scripts, p2wsh_sizes_lens), open(pickle_file + ".pickle", "wb"))
 
 
+def blocksci_find_native_segwit_outputs(chain, restart_from_height=None, coin=BITCOIN):
 
+    #####################################################################
+    # P2WSH AND P2WPKH
+    #####################################################################
+
+    pickle_file = COIN_STR[coin] + "_nativesegwit_outputs"
+
+    if restart_from_height:
+        (p2wsh_outs, p2wsh_outs_spent, p2wpkh_outs, p2wpkh_outs_spent) = pickle.load(
+            open(pickle_file + str(restart_from_height) + ".pickle", "rb"))
+    else:
+        # Store txhash and input index (outs), witness scripts (scripts) and
+        # witness script lengths (lens)
+        p2wsh_outs = {h: [] for h in range(len(chain))}
+        p2wsh_outs_spent = {h: {True: 0, False: 0} for h in range(len(chain))}
+
+        p2wpkh_outs = {h: [] for h in range(len(chain))}
+        p2wpkh_outs_spent = {h: {True: 0, False: 0} for h in range(len(chain))}
+
+        restart_from_height = -1
+
+    # First P2WSH input is in block 482133
+    #for block in chain[482133:]:
+    for block in chain:
+        if block.height > restart_from_height:
+            print(block.height)
+            for tx in block:
+                i = 0
+                for txout in tx.outs:
+                    if txout.address_type == blocksci.address_type.witness_scripthash:
+                        h = block.height
+                        p2wsh_outs[h].append((tx.hash, i))
+                        p2wsh_outs_spent[txout.is_spent] += 1
+                    if txout.address_type == blocksci.address_type.witness_pubkeyhash:
+                        h = block.height
+                        p2wpkh_outs[h].append((tx.hash, i))
+                        p2wpkh_outs_spent[txout.is_spent] += 1
+                    i += 1
+
+            if block.height % SAVE_HEIGHT_INTERVAL == 0:
+                pickle.dump((p2wsh_outs, p2wsh_outs_spent, p2wpkh_outs, p2wpkh_outs_spent),
+                            open(pickle_file + str(block.height) + ".pickle", "wb"))
+
+    pickle.dump((p2wsh_outs, p2wsh_outs_spent, p2wpkh_outs, p2wpkh_outs_spent), open(pickle_file + ".pickle", "wb"))
+
+
+def blocksci_find_native_segwit_inputs(chain, restart_from_height=None, coin=BITCOIN):
+
+    #####################################################################
+    # P2WSH AND P2WPKH
+    #####################################################################
+
+    pickle_file = COIN_STR[coin] + "_nativesegwit_inputs"
+
+    if restart_from_height:
+        (p2wsh_ins, p2wpkh_ins) = pickle.load(
+            open(pickle_file + str(restart_from_height) + ".pickle", "rb"))
+    else:
+        # Store txhash and input index (outs), witness scripts (scripts) and
+        # witness script lengths (lens)
+        p2wsh_ins = {h: [] for h in range(len(chain))}
+        p2wpkh_ins = {h: [] for h in range(len(chain))}
+        restart_from_height = -1
+
+    # SegWit was activated in block 481824
+    for block in chain[481824:]:
+    #for block in chain:
+        if block.height > restart_from_height:
+            print(block.height)
+            for tx in block:
+                i = 0
+                for txin in tx.ins:
+                    if txin.address_type == blocksci.address_type.witness_scripthash:
+                        h = block.height
+                        p2wsh_ins[h].append((tx.hash, i))
+                    if txin.address_type == blocksci.address_type.witness_pubkeyhash:
+                        h = block.height
+                        p2wpkh_ins[h].append((tx.hash, i))
+                    i += 1
+
+            if block.height % SAVE_HEIGHT_INTERVAL == 0:
+                pickle.dump((p2wsh_ins, p2wpkh_ins),
+                            open(pickle_file + str(block.height) + ".pickle", "wb"))
+
+    pickle.dump((p2wsh_ins, p2wpkh_ins), open(pickle_file + ".pickle", "wb"))
 
 
