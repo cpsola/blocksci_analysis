@@ -20,11 +20,13 @@ The main folder contains `python3` code to extract data from `blocksci`. Specifi
 * Input scripts of non-standard inputs.
 * Witness scripts of native P2WSH inputs.
 
-The `notebooks` folder contains jupyter notebooks for creating plots to visualize the extracted data.
+The `notebooks` folder contains jupyter notebooks for creating plots to visualize the extracted data. Notebooks
+can be used **after** having executed `utxo_journal_main.py`, since notebooks only plot the data (that has to be first
+collected with the `utxo_journal_main.py` script).
 
 ### Dependencies
 
-Install `blocksci` and libraries in requirements.txt.
+Install `blocksci` and libraries in `requirements.txt`.
 
 
 

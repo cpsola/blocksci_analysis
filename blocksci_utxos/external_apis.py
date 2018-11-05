@@ -1,16 +1,17 @@
 from time import sleep
-
 import requests
 
 from constants import *
 
 cache_response, cache_txid = None, None
 
+
 def get_script_size_API(list_of_inputs, coin):
     """
-    Queries blockchain.info API for script length of P2SH redeem scripts (P2SH nested in P2SH).
+    Queries blockchain.info API for input script length.
 
-    :param p2sh_in_p2sh:
+    :param list_of_inputs: list of tuples (transaction id, input index)
+    :param coin: BITCOIN, BITCOIN_CASH or LITECOIN
     :return: tuple, list with script lengths and list with scripts
     """
 
@@ -47,7 +48,7 @@ def get_script_size_API(list_of_inputs, coin):
             req = requests.request('GET', url)
             response = req.json()
             cache_response, cache_txid = response, txid
-            sleep(5)
+            sleep(EXTERNAL_API_DELAY)
 
         script = get_hex_script_from_json(response, txid, input_ind)
         return script
@@ -71,9 +72,10 @@ def get_script_size_API(list_of_inputs, coin):
 
 def get_witness_size_API(list_of_inputs, coin):
     """
-    Queries blockchain.info API for witness script lenghts.
+    Queries blockchain.info API for witness script lenght.
 
     :param list_of_inputs: list of tuples (transaction id, input index)
+    :param coin: BITCOIN or LITECOIN
     :return: tuple, list with script lengths and list with scripts
     """
 
@@ -84,7 +86,7 @@ def get_witness_size_API(list_of_inputs, coin):
             req = requests.request('GET', url + str(txid))
             response = req.json()
             script = response["inputs"][input_ind]["witness"]
-            sleep(0.25)
+            sleep(EXTERNAL_API_DELAY)
         elif coin == LITECOIN:
             # These APIs do not seem to include witness scripts
             # url = "https://chain.so/api/v2/get_tx_inputs/LTC/"
@@ -97,7 +99,7 @@ def get_witness_size_API(list_of_inputs, coin):
             data_pushes_script = response["vin"][input_ind]["txinwitness"]
             # This API returns a list with data pushes in the witness, so we need to reconstruct the script:
             script = "".join(["{:02x}{}".format(int(len(d)/2), d) for d in data_pushes_script if d != ""])
-            sleep(1)
+            sleep(EXTERNAL_API_DELAY)
         else:
             raise Exception
 
@@ -108,8 +110,14 @@ def get_witness_size_API(list_of_inputs, coin):
 
     for inp in list_of_inputs:
         (txid, input_ind) = inp
-        script = get_script(txid, input_ind, coin)
+        try:
+            script = get_script(txid, input_ind, coin)
+        except:
+            print("sleeping for an hour...")
+            sleep(3600)
+            script = get_script(txid, input_ind, coin)
+
         scripts.append(script)
-        sizes.append(len(script)/2)
+        sizes.append(len(script) / 2)
 
     return sizes, scripts

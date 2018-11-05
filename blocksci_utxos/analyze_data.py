@@ -3,10 +3,9 @@ import json
 import operator
 import pickle
 from math import sqrt
-
 import numpy as np
-from external_apis import *
 
+from external_apis import *
 from constants import *
 
 
@@ -14,7 +13,15 @@ def flatten_dict_values(d):
     return list(itertools.chain(*d.values()))
 
 
-def dump_estimations_to_json(coin=BITCOIN, input_type = "ALL"):
+def dump_estimations_to_json(coin=BITCOIN, input_type="ALL"):
+    """
+    Dumps estimation data from pickle_files to json files (that can be loaded into STATUS for computing
+    non-profitability metrics).
+
+    :param coin: coin: studied coin
+    :param input_type: type of input to dump ("ALL", "P2PKH", "P2SH", "NONSTD" or "P2WSH")
+    :return:
+    """
 
     if input_type in ["ALL", "P2PKH"]:
 
@@ -127,6 +134,7 @@ def p2sh_compute_script_size(v, ty):
 def p2sh_agg_height_dict(p2sh):
     """
     Aggregates a p2sh dictionary (as stored by blocksci_find_p2shinputs), omitting info about block height.
+
     :param p2sh: dictionary with block height as keys
     :return: dictionary with script types as keys
     """
@@ -149,6 +157,13 @@ def p2sh_agg_height_dict(p2sh):
 
 
 def p2sh_average_size(p2sh, with_vectors=False):
+    """
+    Aggregates P2SH data by type and height, and computes overall averages.
+
+    :param p2sh:
+    :param with_vectors:
+    :return:
+    """
 
     agg_data = p2sh_agg_height_dict(p2sh)
 
@@ -247,6 +262,12 @@ def p2sh_average_size(p2sh, with_vectors=False):
 
 
 def p2sh_num_inputs_per_redeem_script_type(p2sh):
+    """
+    Prints a summary of script types nested in P2SH inputs
+
+    :param p2sh: p2sh dictionary, as created by blocksci_find_p2sh_inputs function
+    :return:
+    """
 
     num_multisig = sum([sum(h_v["multisig"].values()) for h_v in p2sh.values()])
     num_nonstd = sum([sum(h_v["nonstandard"].values()) for h_v in p2sh.values()])
@@ -273,6 +294,12 @@ def p2sh_num_inputs_per_redeem_script_type(p2sh):
 
 
 def p2sh_analysis(coin=BITCOIN):
+    """
+    Prints a summary of P2SH inputs data.
+
+    :param coin: studied coin
+    :return:
+    """
 
     print("P2SH analysis")
     print("--------------------------")
@@ -290,6 +317,7 @@ def p2sh_analysis(coin=BITCOIN):
     agg_data = p2sh_agg_height_dict(p2sh)
     pickle.dump((agg_data), open("p2sh_agg_data.pickle", "wb"))
     sorted_x = sorted(agg_data["multisig"].items(), key=operator.itemgetter(1))
+    print(sorted_x)
 
     """
     [((11, 11), 1), ((8, 10), 1), ((0, 0), 1), ((13, 13), 1), ((3, 10), 1), ((1, 14), 1), ((6, 15), 1), ((4, 9), 1),
@@ -309,6 +337,12 @@ def p2sh_analysis(coin=BITCOIN):
 
 
 def non_std_analysis(coin=BITCOIN):
+    """
+    Prints a summary of non-standard inputs data.
+
+    :param coin: studied coin
+    :return:
+    """
 
     print("Non-std analysis")
     print("--------------------------")
