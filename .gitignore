@@ -94,3 +94,6 @@ ENV/
 
 # Data files
 pickle_files
+
+# HTML files
+*.html
