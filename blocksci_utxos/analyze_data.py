@@ -76,7 +76,7 @@ def dump_estimations_to_json(coin=BITCOIN, input_type="ALL"):
         f.write(json.dumps(non_std_mean))
         f.close()
 
-    if input_type in ["ALL", "P2WSH"]:
+    if input_type in ["ALL", "P2WSH"] and coin != BITCOIN_CASH:
         pickle_file = COIN_STR[coin] + "_p2wsh_inputs"
         (p2wsh_sizes_outs, p2wsh_sizes_scripts, p2wsh_sizes_lens) = pickle.load(open(pickle_file + ".pickle", "rb"))
         flatt_lens = flatten_dict_values(p2wsh_sizes_lens)
