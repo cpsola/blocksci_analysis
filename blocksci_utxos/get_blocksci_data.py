@@ -181,15 +181,18 @@ def blocksci_find_p2sh_inputs(chain, restart_from_height=None, coin=BITCOIN):
                 i = 0
                 for txin in tx.ins:
                     if txin.address_type == blocksci.address_type.scripthash:
-                        if txin.address.script.wrapped_address.type == blocksci.address_type.multisig:
-                            n = txin.address.script.wrapped_script.required
-                            m = txin.address.script.wrapped_script.total
+                        # if txin.address.script.wrapped_address.type == blocksci.address_type.multisig: # v0.4
+                        if txin.address.wrapped_address.type == blocksci.address_type.multisig:
+                            # n = txin.address.script.wrapped_script.required # v0.4
+                            # m = txin.address.script.wrapped_script.total # v0.4
+                            n = txin.address.wrapped_address.required
+                            m = txin.address.wrapped_address.total
                             if (n, m) in p2sh_sizes["multisig"].keys():
                                 p2sh_sizes["multisig"][(n, m)] += 1
                             else:
                                 p2sh_sizes["multisig"][(n, m)] = 1
 
-                        elif txin.address.script.wrapped_address.type == blocksci.address_type.nonstandard:
+                        elif txin.address.wrapped_address.type == blocksci.address_type.nonstandard:
                             lens, _ = get_script_size_API([(tx.hash, i)], coin)
                             l = lens[0]
                             if l in p2sh_sizes["nonstandard"].keys():
@@ -197,21 +200,21 @@ def blocksci_find_p2sh_inputs(chain, restart_from_height=None, coin=BITCOIN):
                             else:
                                 p2sh_sizes["nonstandard"][l] = 1
 
-                        elif txin.address.script.wrapped_address.type == blocksci.address_type.pubkey:
-                            l = len(txin.address.script.wrapped_script.pubkey)
+                        elif txin.address.wrapped_address.type == blocksci.address_type.pubkey:
+                            l = len(txin.address.wrapped_address.pubkey)
                             if l in p2sh_sizes["pubkey"].keys():
                                 p2sh_sizes["pubkey"][l] += 1
                             else:
                                 p2sh_sizes["pubkey"][l] = 1
 
-                        elif txin.address.script.wrapped_address.type == blocksci.address_type.pubkeyhash:
-                            l = len(txin.address.script.wrapped_script.pubkey)
+                        elif txin.address.wrapped_address.type == blocksci.address_type.pubkeyhash:
+                            l = len(txin.address.wrapped_address.pubkey)
                             if l in p2sh_sizes["pubkeyhash"].keys():
                                 p2sh_sizes["pubkeyhash"][l] += 1
                             else:
                                 p2sh_sizes["pubkeyhash"][l] = 1
 
-                        elif txin.address.script.wrapped_address.type == blocksci.address_type.scripthash:
+                        elif txin.address.wrapped_address.type == blocksci.address_type.scripthash:
                             lens, _ = get_script_size_API([(tx.hash, i)], coin)
                             l = lens[0]
                             if l in p2sh_sizes["scripthash"].keys():
@@ -219,10 +222,10 @@ def blocksci_find_p2sh_inputs(chain, restart_from_height=None, coin=BITCOIN):
                             else:
                                 p2sh_sizes["scripthash"][l] = 1
 
-                        elif txin.address.script.wrapped_address.type == blocksci.address_type.witness_pubkeyhash:
+                        elif txin.address.wrapped_address.type == blocksci.address_type.witness_pubkeyhash:
                             p2sh_sizes["P2WPKH"] += 1
 
-                        elif txin.address.script.wrapped_address.type == blocksci.address_type.witness_scripthash:
+                        elif txin.address.wrapped_address.type == blocksci.address_type.witness_scripthash:
                             p2sh_sizes["P2WSH"] += 1
 
                         else:
